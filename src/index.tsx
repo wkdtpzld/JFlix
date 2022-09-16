@@ -4,6 +4,7 @@ import { RecoilRoot } from 'recoil';
 import App from './App';
 import { createGlobalStyle, ThemeProvider } from "styled-components";
 import { theme } from './theme';
+import { QueryClient, QueryClientProvider } from "react-query"
 
 const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement
@@ -44,9 +45,10 @@ const GlobalSyle = createGlobalStyle`
   body {
     font-weight: 300;
     line-height: 1;
-    color: black;
+    color: ${props => props.theme.white.darker};
     font-family: 'Source Sans 3', sans-serif;
     line-height: 1.2;
+    background-color: black;
   }
   a {
     text-decoration: none;
@@ -72,14 +74,17 @@ const GlobalSyle = createGlobalStyle`
   }
   `;
 
+const client = new QueryClient();
 
 root.render(
   <React.StrictMode>
     <RecoilRoot>
-      <ThemeProvider theme={theme}>
-        <GlobalSyle />
-        <App />
-      </ThemeProvider>
+      <QueryClientProvider client={client}>
+        <ThemeProvider theme={theme}>
+          <GlobalSyle />
+          <App />
+        </ThemeProvider>
+      </QueryClientProvider>
     </RecoilRoot>
   </React.StrictMode>
 );
