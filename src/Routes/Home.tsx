@@ -1,45 +1,29 @@
-import { motion, AnimatePresence } from "framer-motion";
 import { useQuery } from "react-query";
 import styled from "styled-components";
-import { FetchGetMovies, IGetMoviesResult } from '../apis/api';
-import { makeImagePath } from '../utils/util';
-import { useMatch, useNavigate } from "react-router-dom";
-import MovieDetail from "./MovieDetail";
-import PopularMovies from "../Components/Home/PopularMovies";
+import { FetchGetMovies, IGetMoviesResult, FetchPopularMV } from '../apis/api';
+import { makeImagePath, types } from '../utils/util';
+import Slider from "../Components/Home/Slider";
 
 const Home = () => {
     
-    const { data: popularData, isLoading } = useQuery<IGetMoviesResult>(["movie", "nowPlaying"], FetchGetMovies);
-    const navigate = useNavigate();
-    const bigMovieMatch = useMatch("/movies/:movieId");
+    const { data: OnAirMoviesData, isLoading: OnAirLoading } = useQuery<IGetMoviesResult>(["movie", "nowPlaying"], FetchGetMovies);
+    const { data: PopularMoviesData, isLoading: PopularLoading } = useQuery <IGetMoviesResult>(["movie", "popular"], FetchPopularMV);
 
-    const onOverlayClick = () => {
-        navigate(-1);
-    }
+    const Loading = OnAirLoading || PopularLoading
 
     return (
         <Wrapper>
-            {isLoading ? (
+            {Loading ? (
                 <Loader>Loading</Loader>
             ) : (
                 <>
-                <Banner bgPhoto={makeImagePath(popularData?.results[0].backdrop_path || "")} >
-                    <Title>{popularData?.results[0].title}</Title>
-                    <Overview>{popularData?.results[0].overview}</Overview>
+                <Banner bgPhoto={makeImagePath(OnAirMoviesData?.results[0].backdrop_path || "")} >
+                    <Title>{OnAirMoviesData?.results[0].title}</Title>
+                    <Overview>{OnAirMoviesData?.results[0].overview}</Overview>
                 </Banner>
-
-                <PopularMovies data={popularData!} />
-    
-                <AnimatePresence>
-                    {bigMovieMatch ?
-                    <>
-                    <Overlay onClick={onOverlayClick} exit={{opacity: 0}} animate={{opacity: 1}} /> 
-                    <BigMovieBox layoutId={bigMovieMatch.params.movieId}>
-                        <MovieDetail />
-                    </BigMovieBox>
-                    </> 
-                     : null}
-                </AnimatePresence>
+                
+                <Slider data={OnAirMoviesData!} type={types.now} />
+                <Slider data={PopularMoviesData!} type={types.popular} />
                 </>
             )}
         </Wrapper>
@@ -80,23 +64,4 @@ const Title = styled.h2`
 const Overview = styled.p`
     font-size: 36px;
     width: 50%;
-`;
-
-const Overlay = styled(motion.div)`
-    position: fixed;
-    top: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0,0,0,0.5);
-    opacity: 0;
-`;
-
-const BigMovieBox = styled(motion.div)`
-    position: fixed;
-    width: 40vw;
-    height: 80vh;
-    top: 100px; 
-    left: 0;
-    right: 0; 
-    margin: 0 auto;
 `;
