@@ -12,6 +12,14 @@ interface IMovie {
     title: string
 }
 
+interface ITv {
+    backdrop_path: string
+    poster_path: string
+    id: number
+    overview: string
+    name: string
+}
+
 interface IVideo {
     id: string,
     site: string,
@@ -42,9 +50,18 @@ export interface IGetDetailMovie {
     vote_average: number
 }
 
+export interface IGetDetailTv {
+    adult: boolean,
+    genres: {
+        id: number,
+        name: string
+    }[],
+    hompage: string
+}
+
 export interface IGetTvResult {
     page: number,
-    results: IMovie[],
+    results: ITv[],
     total_pages: number,
     total_results: number
 }
@@ -76,4 +93,10 @@ export function FetchTvVideo(id: number) {
     return axios.get(`${BASE_PATH}/tv/${id}/videos?api_key=${API_KEY}`)
         .then(res => res.data)
         .catch(error => console.log(error.message));
+}
+
+export function FetchTvDetail(id: number) {
+    return axios.get(`${BASE_PATH}/tv/${id}?api_key=${API_KEY}`)
+        .then(res => res.data)
+        .catch(error => console.log(error.message))
 }
