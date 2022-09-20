@@ -12,6 +12,13 @@ interface IMovie {
     title: string
 }
 
+interface IVideo {
+    id: string,
+    site: string,
+    key: string,
+    type: string
+}
+
 export interface IGetMoviesResult {
     dates: {
         maximum: string;
@@ -29,26 +36,44 @@ export interface IGetDetailMovie {
     genres: {
         id: number,
         name: string
-    },
+    }[],
     original_title: string,
     overview: string,
     vote_average: number
 }
 
-export function FetchGetMovies() {
-    return axios.get(`${BASE_PATH}/movie/now_playing?api_key=${API_KEY}&language=en-US&page=1&region=kr`)
-        .then(res => res.data)
-        .catch(error => console.log(error.message))
+export interface IGetTvResult {
+    page: number,
+    results: IMovie[],
+    total_pages: number,
+    total_results: number
 }
 
-export function FetchPopularMV() {
-    return axios.get(`${BASE_PATH}/movie/popular?api_key=${API_KEY}`)
+export interface IVideoResult {
+    id: number,
+    results: IVideo[]
+}
+
+export function FetchGetMovies(type:string) {
+    return axios.get(`${BASE_PATH}/movie/${type}?api_key=${API_KEY}&language=en-US&page=1&region=kr`)
         .then(res => res.data)
-        .catch(error => console.log(error.message))
+        .catch(error => console.log(error.message));
 }
 
 export function FetchMovieDetail(id:number) {
     return axios.get(`${BASE_PATH}/movie/${id}?api_key=${API_KEY}`)
         .then(res => res.data)
-        .catch(error => console.log(error.message))
+        .catch(error => console.log(error.message));
+}
+
+export function FetchTvShows(type:string) {
+    return axios.get(`${BASE_PATH}/tv/${type}?api_key=${API_KEY}&language=en-US&region=kr`)
+        .then(res => res.data)
+        .catch(error => console.log(error.message));
+}
+
+export function FetchTvVideo(id: number) {
+    return axios.get(`${BASE_PATH}/tv/${id}/videos?api_key=${API_KEY}`)
+        .then(res => res.data)
+        .catch(error => console.log(error.message));
 }
