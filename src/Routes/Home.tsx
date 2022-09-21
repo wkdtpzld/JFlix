@@ -1,7 +1,7 @@
 import { useQuery } from "react-query";
 import styled from "styled-components";
 import { FetchGetMovies, IGetMoviesResult } from '../apis/api';
-import { makeImagePath, types } from '../utils/util';
+import { makeImagePath, types, useWindowDimensions } from '../utils/util';
 import Slider from "../Components/Slider";
 import { Helmet } from "react-helmet"
 
@@ -13,6 +13,10 @@ const Home = () => {
     const { data: UpcomingData, isLoading: UpcomingLoading } = useQuery<IGetMoviesResult>(["movie", "upcoming"], () => FetchGetMovies("upcoming"));
 
     const Loading = OnAirLoading || PopularLoading || TopLatedLoading || UpcomingLoading
+    const width = useWindowDimensions();
+
+    console.log(OnAirMoviesData?.results[0].overview.substring(0,30));
+    
 
     return (
         <>
@@ -26,7 +30,12 @@ const Home = () => {
                     <>
                     <Banner bgPhoto={makeImagePath(OnAirMoviesData?.results[0].backdrop_path || "")} >
                         <Title>{OnAirMoviesData?.results[0].title}</Title>
-                        <Overview>{OnAirMoviesData?.results[0].overview}</Overview>
+                        {width > 700 ? (
+                            <Overview>{OnAirMoviesData?.results[0].overview}</Overview>
+                        ) : (
+                            <Overview>{OnAirMoviesData?.results[0].overview.substring(0,50)}...</Overview>
+                        )}
+                        
                     </Banner>
                     
                     <Slider type={types.now} data={OnAirMoviesData!} />
