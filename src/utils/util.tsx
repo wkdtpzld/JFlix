@@ -12,7 +12,9 @@ export enum types {
 }
 
 export enum tvType {
-    "on_air" = "onAir"
+    "on_air" = "onAir",
+    "popular" = "popular",
+    "top_rated" = "top_rated"
 }
 
 function getWindowDimensions() {

@@ -3,6 +3,7 @@ import styled from "styled-components";
 import { FetchGetMovies, IGetMoviesResult } from '../apis/api';
 import { makeImagePath, types } from '../utils/util';
 import Slider from "../Components/Slider";
+import { Helmet } from "react-helmet"
 
 const Home = () => {
     
@@ -14,23 +15,29 @@ const Home = () => {
     const Loading = OnAirLoading || PopularLoading || TopLatedLoading || UpcomingLoading
 
     return (
-        <Wrapper>
-            {Loading ? (
-                <Loader>Loading</Loader>
-            ) : (
-                <>
-                <Banner bgPhoto={makeImagePath(OnAirMoviesData?.results[0].backdrop_path || "")} >
-                    <Title>{OnAirMoviesData?.results[0].title}</Title>
-                    <Overview>{OnAirMoviesData?.results[0].overview}</Overview>
-                </Banner>
-                
-                <Slider type={types.now} data={OnAirMoviesData!} />
-                <Slider type={types.popular} data={PopularMoviesData!} />
-                <Slider type={types.top} data={TopLatedData!} />
-                <Slider type={types.upcoming} data={UpcomingData!} />
-                </>
-            )}
-        </Wrapper>
+        <>
+            <Helmet>
+                <title>Home</title>
+            </Helmet>
+            <Wrapper>
+                {Loading ? (
+                    <Loader>Loading</Loader>
+                ) : (
+                    <>
+                    <Banner bgPhoto={makeImagePath(OnAirMoviesData?.results[0].backdrop_path || "")} >
+                        <Title>{OnAirMoviesData?.results[0].title}</Title>
+                        <Overview>{OnAirMoviesData?.results[0].overview}</Overview>
+                    </Banner>
+                    
+                    <Slider type={types.now} data={OnAirMoviesData!} />
+                    <Slider type={types.popular} data={PopularMoviesData!} />
+                    <Slider type={types.top} data={TopLatedData!} />
+                    <Slider type={types.upcoming} data={UpcomingData!} />
+                    </>
+                )}
+            </Wrapper>
+        </>
+        
     );
 }
 

@@ -84,7 +84,7 @@ export function FetchMovieDetail(id:number) {
 }
 
 export function FetchTvShows(type:string) {
-    return axios.get(`${BASE_PATH}/tv/${type}?api_key=${API_KEY}&language=en-US&region=kr`)
+    return axios.get(`${BASE_PATH}/tv/${type}?api_key=${API_KEY}&language=en-US&region=jp`)
         .then(res => res.data)
         .catch(error => console.log(error.message));
 }
@@ -95,8 +95,19 @@ export function FetchTvVideo(id: number) {
         .catch(error => console.log(error.message));
 }
 
+export function FetchMovieVideo(id: number) {
+    return axios.get(`${BASE_PATH}/movie/${id}/videos?api_key=${API_KEY}`)
+        .then(res => res.data)
+        .catch(error => console.log(error.message));
+}
+
 export function FetchTvDetail(id: number) {
     return axios.get(`${BASE_PATH}/tv/${id}?api_key=${API_KEY}`)
         .then(res => res.data)
         .catch(error => console.log(error.message))
+}
+
+export function FetchSearchResults(keyword: string, type: string) {
+    return axios.get(`${BASE_PATH}/search/${type}?api_key=${API_KEY}&query=${keyword}`)
+        .then(res => res.data);
 }

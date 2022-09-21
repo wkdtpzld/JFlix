@@ -6,14 +6,12 @@ import Tv from "./Routes/Tv";
 
 function App() {
   return (
-    <Router>
+    <Router basename={process.env.PUBLIC_URL}>
       <Header />
       <Routes>
-        <Route path="/*" element={<Home />}>
-          {/* <Route path="movies/:movieId" element={} /> */}
-        </Route>
+        <Route path="/*" element={<Home />}></Route>
         <Route path="/tv/*" element={<Tv />}></Route>
-        <Route path="/search" element={<Search />}></Route>
+        <Route path="/search/*" element={<Search />}></Route>
       </Routes>
     </Router>
   );

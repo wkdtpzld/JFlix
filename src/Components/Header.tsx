@@ -19,7 +19,7 @@ const logoVariants = {
     }
 }
 
-interface IForm {
+export interface IForm {
     keyword: string;
 }
 
@@ -27,7 +27,8 @@ const Header = () => {
 
     const [searchOpen, setSearchOpen] = useState(false);
     const homeMatch = useMatch("/");
-    const tvMatch = useMatch("/tv");
+    const tvMatch = useMatch("/tv/*");
+    const searchMatch = useMatch("/search/*");
     const { scrollY } = useScroll();
     const bgColor = useTransform(scrollY, [0, 300], ["rgba(0,0,0,0)", "rgba(0,0,0,1)"]);
     const navigate = useNavigate();
@@ -66,6 +67,9 @@ const Header = () => {
                     <Link to="/tv">
                         <Item>Tv Show{tvMatch ? <Circle layoutId="circle" /> : null}</Item>
                     </Link>
+                    <Link to="/search">
+                        <Item>Search{searchMatch ? <Circle layoutId="circle" /> : null}</Item>
+                    </Link>
                 </Items>
             </Col>
             <Col>
@@ -88,7 +92,8 @@ const Header = () => {
                         {...register("keyword", {required: true, minLength: 2})}
                         animate={{ scaleX: searchOpen ? 1 : 0 }}
                         transition= {{type: "linear"}}
-                        placeholder="Search for movie or tv show" />
+                        placeholder="Search for movie or tv show"
+                        autoComplete='off' />
                 </Search>
             </Col>
         </Nav>

@@ -1,11 +1,14 @@
 import styled from 'styled-components';
 import { motion, AnimatePresence } from "framer-motion";
-import { IGetTvResult, FetchTvDetail, IGetDetailTv } from '../apis/api';
+import { IGetTvResult, FetchTvDetail, IGetDetailTv, IVideoResult, FetchTvVideo } from '../apis/api';
 import { useState } from 'react';
-import { makeImagePath } from '../utils/util';
+import { makeImagePath, useWindowDimensions } from '../utils/util';
 import { useNavigate, useMatch } from 'react-router-dom';
 import { FaArrowRight, FaArrowLeft, FaRegWindowClose } from 'react-icons/fa';
 import { useQuery } from 'react-query';
+import { useSetRecoilState } from 'recoil';
+import ReactPlayer from 'react-player';
+import { TvMovieAtom } from '../recoil/atoms';
 
 
 const rowVariants = {
@@ -56,10 +59,10 @@ const TvSlider = ({type, data}:{type: string, data:IGetTvResult}) => {
     const [leaving, setLeaving] = useState(false);
     const [arrow, setArrow] = useState(false);
     const [index, setIndex] = useState(0);
+    const setHomeVideo = useSetRecoilState(TvMovieAtom);
     
     const totalMovies = data.results.length;
     const maxIndex = Math.floor(totalMovies / offset) - 1;
-
 
     const toggleLeaving = () => {
         setLeaving(prev => !prev);
@@ -90,15 +93,16 @@ const TvSlider = ({type, data}:{type: string, data:IGetTvResult}) => {
     const navigate = useNavigate();
     const onBoxClicked = (id: number, type: string) => {
         navigate(`/tv/${type}/${id}`);
+        setHomeVideo(false);
     };
 
     const bigTvMatch = useMatch(`/tv/${type}/:tvId`);
     const clickedTv = data.results.find(item => item.id + "" === bigTvMatch?.params.tvId);
 
     const { data: clickedTvDetail } = useQuery<IGetDetailTv>(["tvShow", clickedTv?.id], () => FetchTvDetail(+bigTvMatch?.params.tvId!));
-    
-    console.log(clickedTvDetail);
-    
+    const { data: clickedTvVideo } = useQuery<IVideoResult>(["tvShows", clickedTv?.id], () => FetchTvVideo(clickedTv?.id!))
+    const width = useWindowDimensions();
+
 
     return (
         <SliderWrap>
@@ -147,21 +151,42 @@ const TvSlider = ({type, data}:{type: string, data:IGetTvResult}) => {
                     <Overlay
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
-                        onClick={() => navigate("/tv")}
+                        onClick={() => { 
+                            navigate("/tv");
+                            setHomeVideo(true);
+                        }}
                     />
                     {clickedTv && (
                         <BigTvShow layoutId={type + bigTvMatch.params.tvId} bgPhoto={makeImagePath(clickedTv?.backdrop_path || clickedTv?.poster_path || "")} >
                             <BigTvCover bgPhoto={makeImagePath(clickedTv?.poster_path || "")} />
                             <BigTvContent>
-                                <BigTvBackToHome onClick={() => navigate("/tv")}>
+                                <BigTvBackToHome onClick={() => { 
+                                                    navigate("/tv");
+                                                    setHomeVideo(true);
+                                                }}>
                                     <FaRegWindowClose size={40} color="white" />
                                 </BigTvBackToHome>
-                                    <h1>{clickedTv.name}</h1>
-                                    <h3>{clickedTv.overview}</h3>
-                                    <span style={{ color: "#72d19d" }}>Geners</span>
-                                    {clickedTvDetail?.genres.map(item => (
-                                        <span>{item.name}</span>
-                                    ))}
+                                    <BigTvOverview>
+                                        <div>
+                                            <h1>{clickedTv.name}</h1>
+                                            <h3>{clickedTv.overview}</h3>
+                                            <span style={{ color: "#72d19d" }}>Geners</span>
+                                            {clickedTvDetail?.genres.map(item => (
+                                                <span>{item.name}</span>
+                                            ))}
+                                        </div>
+                                        <ReactPlayer
+                                            url={`https://www.youtube.com/embed/${clickedTvVideo?.results[0]?.key}?showinfo=0&enablejsapi=1&origin=http://localhost:3000`}
+                                            width={width / 2.5}
+                                            height={'300px'}
+                                            volume={0.3}
+                                            playing={true}
+                                            loop={true}
+                                            style={{pointerEvents: 'none'}}
+                                        >
+                                        </ReactPlayer>
+                                    </BigTvOverview>
+                                    
                                     
                             </BigTvContent>
                         </BigTvShow>    
@@ -263,10 +288,10 @@ const Overlay = styled(motion.div)`
     z-index: 3;
 `;
 
-const BigTvShow = styled(motion.div)<{ bgPhoto: string }>`
+export const BigTvShow = styled(motion.div)<{ bgPhoto: string }>`
     position: fixed;
     width: 95vw;
-    height: 90vh;
+    height: 80vh;
     top: 80px;
     left: 0;
     right: 0;
@@ -293,7 +318,7 @@ const BigTvShow = styled(motion.div)<{ bgPhoto: string }>`
     padding: 50px;
 `;
 
-const BigTvCover = styled.div<{ bgPhoto: string }>`
+export const BigTvCover = styled.div<{ bgPhoto: string }>`
     background-image: url(${props => props.bgPhoto});
     background-position: center center;
     background-size: cover;
@@ -306,9 +331,8 @@ const BigTvCover = styled.div<{ bgPhoto: string }>`
     border-radius: 15px;
 `;
 
-const BigTvContent = styled.div`
+export const BigTvContent = styled.div`
     color: ${props => props.theme.white.lighter};
-    height: 50%;
     text-overflow: ellipsis;
 
     h1 {
@@ -329,13 +353,13 @@ const BigTvContent = styled.div`
     }
     
     span {
-        font-size: 30px;
+        font-size: 20px;
         font-weight: 700;
         margin-right: 15px;
     }
 `;
 
-const BigTvBackToHome = styled.div`
+export const BigTvBackToHome = styled.div`
     position: absolute;
     top: 30px;
     right: 30px;
@@ -343,4 +367,10 @@ const BigTvBackToHome = styled.div`
     height: 50px;
 
     cursor: pointer;
+`;
+
+export const BigTvOverview = styled.div`
+    display: grid;
+    grid-template-rows: repeat(2, 1fr);
+    gap: 15px;
 `;

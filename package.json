@@ -13,8 +13,10 @@
     "@types/webrtc": "^0.0.32",
     "axios": "^0.27.2",
     "framer-motion": "^6.3.3",
+    "gh-pages": "^4.0.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
+    "react-helmet": "^6.1.0",
     "react-hook-form": "^7.35.0",
     "react-icons": "^4.4.0",
     "react-player": "^2.11.0",
@@ -30,7 +32,9 @@
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "predeploy": "npm run build",
+    "deploy": "gh-pages -d build"
   },
   "eslintConfig": {
     "extends": [
@@ -51,6 +55,7 @@
     ]
   },
   "devDependencies": {
+    "@types/react-helmet": "^6.1.5",
     "@types/styled-components": "^5.1.26"
   }
 }

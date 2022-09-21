@@ -6,6 +6,10 @@ import ReactPlayer from 'react-player';
 import styled from 'styled-components';
 import TvSlider from '../Components/TvSlider';
 import { AnimatePresence, motion } from "framer-motion";
+import { useRecoilValue } from 'recoil';
+import { TvMovieAtom } from '../recoil/atoms';
+import { useState } from 'react';
+import { Helmet } from 'react-helmet';
 
 
 const VideoVariants = {
@@ -26,46 +30,56 @@ const VideoVariants = {
 
 const Tv = () => {
 
-    const { data, isLoading } = useQuery<IGetTvResult>(["tvShows", "onAir"], () => FetchTvShows("on_the_air"));
-
-    const Loading = isLoading;
-    const { data: VideoData } = useQuery<IVideoResult>(["tvShows", data?.results[0].id], () => FetchTvVideo(data?.results[0].id!))
+    const { data: OnAirData, isLoading: OnAirLoading } = useQuery<IGetTvResult>(["tvShows", "onAir"], () => FetchTvShows("on_the_air"));
+    const { data: PopularData, isLoading: PopularLoading } = useQuery<IGetTvResult>(["tvShows", "popular"], () => FetchTvShows("popular"));
+    const { data: TopRateData, isLoading: TopRateLoading } = useQuery<IGetTvResult>(["tvShows", "top_rated"], () => FetchTvShows("top_rated"));
+    const { data: VideoData, isLoading: VideoLoading } = useQuery<IVideoResult>(["tvShows", OnAirData?.results[0].id], () => FetchTvVideo(OnAirData?.results[0].id!))
+    
+    const Loading = OnAirLoading || VideoLoading || PopularLoading || TopRateLoading;
     const Teaser = VideoData?.results.find(item => item.type === "Teaser");
     const width = useWindowDimensions();
-
-    console.log(data);
-    
+    const homeVideo = useRecoilValue(TvMovieAtom);
+    const [isMute, setIsMute] = useState(false);
 
     return (
+        <>
+        <Helmet>
+            <title>Tv Show</title>
+        </Helmet>
         <Wrapper>
             {Loading ? (
                 "...Loading"
             ) : (
                 <>
                 
-                <Banner bgPhoto={makeImagePath(data?.results[0].backdrop_path || "")} >
+                <Banner bgPhoto={makeImagePath(OnAirData?.results[0].backdrop_path || "")} >
                     <VideoContainer variants={VideoVariants} initial="normal" whileHover="hover" exit="exit">
                         <AnimatePresence>
                             <ReactPlayer 
                                 url={`https://www.youtube.com/embed/${Teaser?.key}?showinfo=0&enablejsapi=1&origin=http://localhost:3000` || ""}
                                 width={width - 120}
-                                height={`650px`}
-                                playing={true}
+                                height={width / 2.3}
+                                playing={homeVideo}
                                 controls={false}
                                 loop={true}
                                 volume={0.3}
-                                muted={false}
+                                muted={isMute}
+                                style={{pointerEvents: 'none'}}
                             />    
                         </AnimatePresence>
-                        
                     </VideoContainer>
+                    <MuteBox onClick={() => setIsMute(prev => !prev)}>{isMute ? "Mute" : "Sound On"}</MuteBox>
                 </Banner>
                 
-                <TvSlider data={data!} type={tvType.on_air} />
+                <TvSlider data={OnAirData!} type={tvType.on_air} />
+                <TvSlider data={PopularData!} type={tvType.popular} />
+                <TvSlider data={TopRateData!} type={tvType.top_rated} />
                 </>
                 
             )}
         </Wrapper>
+        </>
+        
     );
 }
 
@@ -75,4 +89,25 @@ const VideoContainer = styled(motion.div)`
     min-width: 100%;
     overflow: hidden;
     opacity: 1;
+`;
+
+const MuteBox = styled.div`
+    width: 100px;
+    height: 30px;
+    background-color: ${props => props.theme.white.lighter};
+    display: flex;
+    align-items: center ;
+    justify-content: center;
+    margin-left: auto;
+    border-radius: 20px;
+    margin-top: 50px;
+    text-align: center;
+    color: ${props => props.theme.black.darker};
+    font-weight: 700;
+    cursor: pointer;
+    -ms-user-select: none; 
+    -moz-user-select: -moz-none;
+    -khtml-user-select: none;
+    -webkit-user-select: none;
+    user-select: none;
 `;
